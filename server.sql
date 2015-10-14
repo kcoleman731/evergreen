@@ -1,3 +1,4 @@
+-- name: create-company-table
 CREATE TABLE companies (
     company_id serial NOT NULL,
     name character varying(100) NOT NULL,
@@ -6,6 +7,7 @@ CREATE TABLE companies (
     created date
 );
 
+-- name: create-user-table
 CREATE TABLE users (
     user_id serial NOT NULL,
     first_name character varying(100) NOT NULL,
@@ -16,6 +18,7 @@ CREATE TABLE users (
     created date
 );
 
+-- name: create-users-table
 CREATE TABLE products (
     product_id serial NOT NULL,
     name character varying(100) NOT NULL,

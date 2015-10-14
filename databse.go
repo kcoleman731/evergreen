@@ -127,8 +127,24 @@ func DatabaseIdentifier(rows *sql.Rows) (string, error) {
 		}
 	}
 	if id == "" {
-		errorString := fmt.Sprintf("Failed to get Database identifier with error: %v\n", err)
-		err = errors.New(errorString)
+		errStr := fmt.Sprintf("Failed to get Database identifier with error: %v\n", err)
+		err = errors.New(errStr)
 	}
 	return id, err
+}
+
+func ObjectsFromResult(rows *sql.Rows, object interface{}) []interface{} {
+	// objects = []interce{}
+	// columns, err := rows.Columns()
+	// if err != nil {
+	// 	fmt.Printf("Failed getting database columns with error - %+v\n", err)
+	// }
+	// // Figure out how to dynamically create an args ...
+	// if rows.Next() {
+	// 	err := rows.Scan(&company.Identifier, &company.Name, &company.Funding, &company.Website, &company.Created)
+	// 	if err != nil {
+	// 		fmt.Printf("Failed getting database identifier with error - %+v\n", err)
+	// 	}
+	// }
+	return nil
 }
