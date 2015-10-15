@@ -64,6 +64,7 @@ func (d *Database) Close() error {
 //
 // Method should be used for persisting new and updated data.
 func (d *Database) Execute(q *Query) (sql.Result, error) {
+	q.Compile()
 	stmt, err := d.Connection.Prepare(q.SQL)
 	if err != nil {
 		return nil, err
@@ -71,15 +72,33 @@ func (d *Database) Execute(q *Query) (sql.Result, error) {
 	return stmt.Exec(q.Args...)
 }
 
+func (d *Database) ExecuteSQL(SQL string, args []interface{}) (sql.Result, error) {
+	stmt, err := d.Connection.Prepare(SQL)
+	if err != nil {
+		return nil, err
+	}
+	return stmt.Exec(args...)
+}
+
 // Executes the supplied query and returns the resulting rows.
 //
 // Method should be used with select statements.
 func (d *Database) Query(q *Query) (*sql.Rows, error) {
+	q.Compile()
+	fmt.Printf("Executing Query: %v\n Args: %v ", q.SQL, q.Args)
 	stmt, err := d.Connection.Prepare(q.SQL)
 	if err != nil {
 		return nil, err
 	}
 	return stmt.Query(q.Args...)
+}
+
+func (d *Database) QuerySQL(SQL string, args []interface{}) (*sql.Rows, error) {
+	stmt, err := d.Connection.Prepare(SQL)
+	if err != nil {
+		return nil, err
+	}
+	return stmt.Query(args...)
 }
 
 //---------------------------
