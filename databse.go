@@ -63,13 +63,21 @@ func (d *Database) Close() error {
 // Executes a query without returning any rows.
 //
 // Method should be used for persisting new and updated data.
-func (d *Database) Execute(sql string, args ...interface{}) (sql.Result, error) {
-	stmt, err := d.Connection.Prepare(sql)
+func (d *Database) Execute(q *Query) (sql.Result, error) {
+	stmt, err := d.Connection.Prepare(q.SQL)
 	if err != nil {
 		return nil, err
 	}
-	return stmt.Exec(args...)
+	return stmt.Exec(q.Values...)
 }
+
+// func (d *Database) Execute(sql string, args ...interface{}) (sql.Result, error) {
+// 	stmt, err := d.Connection.Prepare(sql)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return stmt.Exec(args...)
+// }
 
 // Executes the supplied query and returns the resulting rows.
 //
@@ -111,6 +119,49 @@ func (d *Database) Test() error {
 		}
 		return true, nil
 	})
+}
+
+//------------
+// SQL Helpers
+//------------
+
+type Query struct {
+	SQL    string
+	Values []interface{}
+}
+
+func (q *Query) Select(values []string) *Query {
+	// if values. > 0 {
+	// 	return fmt.Sprintf("SELECT * ")
+	// } else {
+	// 	return fmt.Sprintf("SELECT * ")
+	// }
+	return q
+}
+
+func (q *Query) From(value string) *Query {
+	// return fmt.Sprintf("FROM %v", value)
+	return q
+}
+
+func (q *Query) Insert(table string) *Query {
+	// return fmt.Sprintf("INSERT INTO %v", m.Name)
+	return q
+}
+
+func (q *Query) Collums(values []string) *Query {
+	// return fmt.Sprintf("(%v)", collums)
+	return q
+}
+
+func (q *Query) Values(values []interface{}) *Query {
+	// return fmt.Sprintf("VALUES(%v)", values)
+	return q
+}
+
+func (q *Query) Return(value string) *Query {
+	// return fmt.Sprintf("RETURNING %v", value)
+	return q
 }
 
 //---------------------------
