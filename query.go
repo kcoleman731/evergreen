@@ -10,84 +10,96 @@ import (
 //------------
 
 const (
-	Insert = "INSERT INTO "
-	Select = "SELECT "
-	Update = "UPDATE "
-	DELETE = "DELETE "
+	INSERT = "INSERT INTO"
+	SELECT = "SELECT"
+	UPDATE = "UPDATE"
+	DELETE = "DELETE"
 )
 
 type Query struct {
-	Action string
-	Table  string
-	Collum []string
-	Value  []interface{}
-	Return string
-	sql    string
-	SQL    string
-	Args   []interface{}
+	Action  string
+	Table   string
+	Collums []string
+	Values  []interface{}
+	Where   map[string]interface{}
+	Return  string
+	SQL     string
+	Args    []interface{}
 }
 
 func NewQuery() *Query {
 	return &Query{}
 }
 
-func (q *Query) Select(values []string) *Query {
-	// if values > 0 {
-	// 	q.SQL = fmt.Sprintf("SELECT * ")
-	// } else {
-	// 	q.SQL = fmt.Sprintf("SELECT * ")
-	// }
-	return q
-}
-
-func (q *Query) Insert(table string) *Query {
-	q.SQL = fmt.Sprintf("INSERT INTO %v", table)
-	return q
-}
-
-func (q *Query) From(value string) *Query {
-	// return fmt.Sprintf("FROM %v", value)
-	return q
-}
-
-func Collums(q *Query) string {
-	collums := ToString(q.Collum, ", ")
-	return "(" + collums + ")"
-}
-
-func Values(q *Query) string {
-	values := ""
-	length := (len(q.Value) - 1)
-	for i := 0; i < length; i++ {
-		values = values + "$" + strconv.Itoa(i+1) + ","
+func Select(collums []string, q *Query) {
+	SQL := ""
+	if collums != nil {
+		SQL = fmt.Sprintf("%s %s", SELECT, CollumsToString(collums))
+	} else {
+		SQL = fmt.Sprintf("%s *", SELECT)
 	}
-	values = values + "$" + strconv.Itoa(len(q.Value))
-	return " VALUES(" + values + ")"
+	q.SQL = SQL
 }
 
-func Return(q *Query) string {
-	return " RETURNING " + q.Return
+func From(table string, q *Query) {
+	q.SQL = fmt.Sprintf("%s FROM %s", q.SQL, table)
+}
+
+func Where(where map[string]interface{}, q *Query) {
+	q.SQL = fmt.Sprintf("%s WHERE", q.SQL)
+}
+
+func Insert(table string, q *Query) {
+	q.SQL = fmt.Sprintf("INSERT INTO %s", table)
+}
+
+func Collums(collums []string, q *Query) {
+	q.SQL = fmt.Sprintf("%s (%s)", q.SQL, CollumsToString(collums))
+}
+
+func Values(values []interface{}, q *Query) {
+	q.SQL = fmt.Sprintf("%s VALUES (%s)", q.SQL, ValuesToString(values))
+}
+
+func Return(r string, q *Query) {
+	q.SQL = fmt.Sprintf("%s RETURNING %s", q.SQL, r)
+}
+
+func CollumsToString(collums []string) string {
+	return ToString(collums, ", ")
+}
+
+func ValuesToString(values []interface{}) string {
+	valueString := ""
+	length := (len(values) - 1)
+	for i := 0; i < length; i++ {
+		valueString = valueString + "$" + strconv.Itoa(i+1) + ","
+	}
+	valueString = valueString + "$" + strconv.Itoa(len(values))
+	return valueString
 }
 
 func (q *Query) Compile() *Query {
-	sql := ""
 	switch q.Action {
-	case Insert:
-		sql = Insert + q.Table
+	case INSERT:
+		Insert(q.Table, q)
+		if q.Collums != nil {
+			Collums(q.Collums, q)
+		}
+		if q.Values != nil {
+			Values(q.Values, q)
+		}
+		if q.Return != "" {
+			Return(q.Return, q)
+		}
+	case SELECT:
+		Select(q.Collums, q)
+		From(q.Table, q)
+		if q.Where != nil {
+			Where(q.Where, q)
+		}
 	}
-	if q.Collum != nil {
-		sql = sql + Collums(q)
-	}
-
-	if q.Value != nil {
-		sql = sql + Values(q)
-	}
-
-	if q.Return != "" {
-		sql = sql + Return(q)
-	}
-	q.Args = q.Value
-	q.SQL = sql
+	q.Args = q.Values
 	return q
 }
 

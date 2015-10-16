@@ -27,8 +27,8 @@ type Database struct {
 	Connection *sql.DB
 }
 
-func New(user string, password string, name string, driver string) Database {
-	return Database{User: user, Password: password, Name: name, Driver: driver}
+func New(user string, password string, name string, driver string) *Database {
+	return &Database{User: user, Password: password, Name: name, Driver: driver}
 }
 
 // Opens and establishes a connection to the underlying database. Upon establishing
