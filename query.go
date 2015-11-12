@@ -34,7 +34,7 @@ func NewQuery() *Query {
 func Select(collums []string, q *Query) {
 	SQL := ""
 	if collums != nil {
-		SQL = fmt.Sprintf("%s %s", SELECT, CollumsToString(collums))
+		SQL = fmt.Sprintf("%s %s", SELECT, ArrayToString(collums, ", "))
 	} else {
 		SQL = fmt.Sprintf("%s *", SELECT)
 	}
@@ -47,6 +47,12 @@ func From(table string, q *Query) {
 
 func Where(where map[string]interface{}, q *Query) {
 	q.SQL = fmt.Sprintf("%s WHERE", q.SQL)
+	index := 1
+	for k, _ := range where {
+		q.SQL = fmt.Sprintf("%s %s = $%v", q.SQL, k, index)
+		index++
+	}
+	q.Args = AllValues(where)
 }
 
 func Insert(table string, q *Query) {
@@ -54,7 +60,7 @@ func Insert(table string, q *Query) {
 }
 
 func Collums(collums []string, q *Query) {
-	q.SQL = fmt.Sprintf("%s (%s)", q.SQL, CollumsToString(collums))
+	q.SQL = fmt.Sprintf("%s (%s)", q.SQL, ArrayToString(collums, ", "))
 }
 
 func Values(values []interface{}, q *Query) {
@@ -63,10 +69,6 @@ func Values(values []interface{}, q *Query) {
 
 func Return(r string, q *Query) {
 	q.SQL = fmt.Sprintf("%s RETURNING %s", q.SQL, r)
-}
-
-func CollumsToString(collums []string) string {
-	return ToString(collums, ", ")
 }
 
 func ValuesToString(values []interface{}) string {
@@ -92,6 +94,7 @@ func (q *Query) Compile() *Query {
 		if q.Return != "" {
 			Return(q.Return, q)
 		}
+		q.Args = q.Values
 	case SELECT:
 		Select(q.Collums, q)
 		From(q.Table, q)
@@ -99,11 +102,10 @@ func (q *Query) Compile() *Query {
 			Where(q.Where, q)
 		}
 	}
-	q.Args = q.Values
 	return q
 }
 
-func ToString(ary []string, split string) string {
+func ArrayToString(ary []string, split string) string {
 	str := ""
 	length := len(ary) - 1
 	for i := 0; i < length; i++ {

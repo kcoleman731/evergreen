@@ -136,9 +136,9 @@ func (d *Database) Test() error {
 // Helpers
 //---------------------------
 
-func DatabaseIdentifier(rows *sql.Rows) (string, error) {
+func DatabaseIdentifier(rows *sql.Rows) (interface{}, error) {
 	var err error
-	var id string
+	var id interface{}
 	for rows.Next() {
 		err = rows.Scan(&id)
 		if err != nil {

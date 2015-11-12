@@ -63,7 +63,7 @@ func TestSelectStmtWithWhere(t *testing.T) {
 	}
 	query.Compile()
 	fmt.Printf("Query: %v\n", query.SQL)
-	if query.SQL != "SELECT * FROM people" {
+	if query.SQL != "SELECT * FROM people WHERE name = $1" {
 		t.Fail()
 	}
 }
